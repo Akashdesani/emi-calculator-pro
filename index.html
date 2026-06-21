@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti-Gravity EMI Calculator | Digital Heroes</title>
+  <meta name="description" content="A futuristic, anti-gravity floating EMI Calculator with cyberpunk glassmorphism design. Calculate your Monthly EMI, Total Interest, and Total Payment instantly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ───────────────────────────────────────────────
+       CSS CUSTOM PROPERTIES — DESIGN TOKENS
+    ─────────────────────────────────────────────── */
+    :root {
+      --cyan:      #00f0ff;
+      --cyan-dim:  rgba(0, 240, 255, 0.15);
+      --cyan-glow: rgba(0, 240, 255, 0.55);
+      --magenta:   #ff00c8;
+      --magenta-dim: rgba(255, 0, 200, 0.12);
+      --magenta-glow: rgba(255, 0, 200, 0.5);
+      --gold:      #ffd700;
+      --gold-dim:  rgba(255, 215, 0, 0.15);
+      --glass-bg:  rgba(8, 12, 28, 0.72);
+      --glass-border: rgba(0, 240, 255, 0.22);
+      --surface:   rgba(12, 18, 40, 0.85);
+      --text-primary: #e8f4ff;
+      --text-muted: rgba(232, 244, 255, 0.55);
+      --grid-color: rgba(0, 240, 255, 0.06);
+      --float-duration: 4.5s;
+      --shadow-base: 0 30px 80px rgba(0, 0, 0, 0.7);
+    }
+
+    /* ───────────────────────────────────────────────
+       GLOBAL RESET & BASE
+    ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      background: #020510;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem 3rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ───────────────────────────────────────────────
+       DEEP-SPACE GRID BACKGROUND
+    ─────────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 48px 48px;
+      z-index: 0;
+      animation: gridPulse 8s ease-in-out infinite;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 20% 15%, rgba(0, 240, 255, 0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 85%, rgba(255, 0, 200, 0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 50%, rgba(2, 5, 16, 0.5) 0%, transparent 100%);
+      z-index: 0;
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.6; }
+      50%       { opacity: 1; }
+    }
+
+    /* Floating particles */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: particleDrift linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes particleDrift {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.6; }
+      100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    }
+
+    /* ───────────────────────────────────────────────
+       PAGE HEADER
+    ─────────────────────────────────────────────── */
+    .page-header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .page-header .badge {
+      display: inline-block;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      background: var(--cyan-dim);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 99px;
+      padding: 0.35rem 1.1rem;
+      margin-bottom: 1rem;
+      animation: badgePulse 3s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { box-shadow: 0 0 8px var(--cyan-glow); }
+      50%       { box-shadow: 0 0 20px var(--cyan-glow), 0 0 40px rgba(0,240,255,0.2); }
+    }
+
+    .page-header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--cyan) 0%, #a78bfa 50%, var(--magenta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 18px rgba(0,240,255,0.4));
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ───────────────────────────────────────────────
+       ANTI-GRAVITY WRAPPER (shadow + float)
+    ─────────────────────────────────────────────── */
+    .antigravity-wrapper {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: floatUp var(--float-duration) ease-in-out infinite;
+    }
+
+    @keyframes floatUp {
+      0%   { transform: translateY(0px)   rotate(0deg); }
+      25%  { transform: translateY(-14px) rotate(0.4deg); }
+      50%  { transform: translateY(-22px) rotate(0deg); }
+      75%  { transform: translateY(-10px) rotate(-0.4deg); }
+      100% { transform: translateY(0px)   rotate(0deg); }
+    }
+
+    /* Dynamic shadow — expands when card is "higher" */
+    .antigravity-shadow {
+      width: 75%;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(0, 240, 255, 0.25) 0%, rgba(0,0,0,0) 75%);
+      filter: blur(8px);
+      margin-top: 12px;
+      animation: shadowBreath var(--float-duration) ease-in-out infinite;
+      order: 1;
+    }
+
+    @keyframes shadowBreath {
+      0%   { transform: scaleX(1.0);  opacity: 0.7; }
+      25%  { transform: scaleX(0.88); opacity: 0.5; }
+      50%  { transform: scaleX(0.72); opacity: 0.3; }
+      75%  { transform: scaleX(0.84); opacity: 0.45; }
+      100% { transform: scaleX(1.0);  opacity: 0.7; }
+    }
+
+    /* ───────────────────────────────────────────────
+       MAIN GLASSMORPHISM CARD
+    ─────────────────────────────────────────────── */
+    .calculator-card {
+      width: min(520px, 100%);
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 2.4rem 2.2rem 2rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(0, 240, 255, 0.08),
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 0 60px rgba(0, 240, 255, 0.06);
+      transition: box-shadow 0.3s ease;
+    }
+
+    /* Neon corner accents */
+    .calculator-card::before,
+    .calculator-card::after {
+      content: '';
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 4px;
+    }
+
+    .calculator-card::before {
+      top: -1px; left: -1px;
+      border-top: 2.5px solid var(--cyan);
+      border-left: 2.5px solid var(--cyan);
+      box-shadow: -4px -4px 18px var(--cyan-glow);
+      border-radius: 24px 0 0 0;
+    }
+
+    .calculator-card::after {
+      bottom: -1px; right: -1px;
+      border-bottom: 2.5px solid var(--magenta);
+      border-right: 2.5px solid var(--magenta);
+      box-shadow: 4px 4px 18px var(--magenta-glow);
+      border-radius: 0 0 24px 0;
+    }
+
+    /* Ambient inner glow sweep */
+    .card-glow {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        transparent 0deg,
+        rgba(0, 240, 255, 0.04) 60deg,
+        transparent 120deg,
+        rgba(255, 0, 200, 0.04) 220deg,
+        transparent 280deg
+      );
+      animation: cardGlowSpin 12s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes cardGlowSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .card-content { position: relative; z-index: 1; }
+
+    /* Card internal header */
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--cyan-dim), var(--magenta-dim));
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      display: grid;
+      place-items: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes iconPulse {
+      0%, 100% { box-shadow: 0 0 10px var(--cyan-glow); }
+      50%       { box-shadow: 0 0 24px var(--cyan-glow), 0 0 48px rgba(0,240,255,0.15); }
+    }
+
+    .card-title-group h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.05em;
+    }
+
+    .card-title-group span {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ───────────────────────────────────────────────
+       DIVIDER
+    ─────────────────────────────────────────────── */
+    .neon-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent);
+      margin-bottom: 1.8rem;
+      opacity: 0.4;
+    }
+
+    /* ───────────────────────────────────────────────
+       INPUT FIELDS
+    ─────────────────────────────────────────────── */
+    .input-group {
+      margin-bottom: 1.4rem;
+    }
+
+    .input-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.55rem;
+    }
+
+    .input-label label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .input-label .input-tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--cyan);
+      background: var(--cyan-dim);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    .input-wrapper:hover {
+      transform: translateY(-3px);
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cyan);
+      pointer-events: none;
+      z-index: 2;
+      user-select: none;
+    }
+
+    .field-input {
+      width: 100%;
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 12px;
+      padding: 0.85rem 1rem 0.85rem 2.4rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.3s ease;
+      caret-color: var(--cyan);
+      letter-spacing: 0.05em;
+    }
+
+    .field-input.no-prefix {
+      padding-left: 1rem;
+    }
+
+    .field-input::placeholder {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 400;
+      font-size: 0.85rem;
+      color: rgba(232, 244, 255, 0.25);
+      letter-spacing: 0.05em;
+    }
+
+    .field-input:focus {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.07);
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.12), 0 0 20px rgba(0, 240, 255, 0.1);
+    }
+
+    /* Range slider track */
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.65rem;
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      height: 4px;
+      border-radius: 99px;
+      background: linear-gradient(
+        90deg,
+        var(--cyan) var(--progress, 0%),
+        rgba(255,255,255,0.08) var(--progress, 0%)
+      );
+      outline: none;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+
+    .range-slider:hover {
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan-glow), 0 0 20px rgba(0,240,255,0.3);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 2px solid rgba(0,0,0,0.5);
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+      box-shadow: 0 0 16px var(--cyan-glow), 0 0 32px rgba(0,240,255,0.4);
+    }
+
+    .range-max {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    }
+
+    /* ───────────────────────────────────────────────
+       CALCULATE BUTTON
+    ─────────────────────────────────────────────── */
+    .btn-calculate {
+      width: 100%;
+      margin-top: 1.6rem;
+      padding: 1rem 2rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #020510;
+      background: linear-gradient(135deg, var(--cyan) 0%, #4dd8e6 50%, #00b8cc 100%);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+      box-shadow: 0 4px 24px rgba(0, 240, 255, 0.3), 0 0 0 1px rgba(0,240,255,0.3);
+    }
+
+    .btn-calculate::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 40%; height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.5s ease;
+    }
+
+    .btn-calculate:hover::before {
+      left: 130%;
+    }
+
+    .btn-calculate:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(0, 240, 255, 0.5), 0 0 0 1px rgba(0,240,255,0.5), 0 0 60px rgba(0,240,255,0.15);
+    }
+
+    .btn-calculate:active {
+      transform: translateY(-1px) scale(0.99);
+    }
+
+    .btn-calculate .btn-icon {
+      display: inline-block;
+      margin-right: 0.4rem;
+      font-size: 1rem;
+    }
+
+    /* ───────────────────────────────────────────────
+       RESULTS PANEL
+    ─────────────────────────────────────────────── */
+    .results-panel {
+      margin-top: 1.8rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.34,1.56,.64,1);
+      pointer-events: none;
+    }
+
+    .results-panel.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: all;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 1.1rem 0.85rem;
+      text-align: center;
+      border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+    }
+
+    .result-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .result-card.emi-card {
+      border-color: rgba(0, 240, 255, 0.25);
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.08);
+    }
+
+    .result-card.emi-card:hover {
+      box-shadow: 0 8px 32px rgba(0, 240, 255, 0.2), 0 0 0 1px rgba(0,240,255,0.3);
+    }
+
+    .result-card.interest-card {
+      border-color: rgba(255, 0, 200, 0.2);
+      box-shadow: 0 0 24px rgba(255, 0, 200, 0.06);
+    }
+
+    .result-card.interest-card:hover {
+      box-shadow: 0 8px 32px rgba(255, 0, 200, 0.18), 0 0 0 1px rgba(255,0,200,0.3);
+    }
+
+    .result-card.total-card {
+      border-color: rgba(255, 215, 0, 0.2);
+      box-shadow: 0 0 24px rgba(255, 215, 0, 0.05);
+    }
+
+    .result-card.total-card:hover {
+      box-shadow: 0 8px 32px rgba(255, 215, 0, 0.18), 0 0 0 1px rgba(255,215,0,0.3);
+    }
+
+    /* Animated shimmer line top of each card */
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .emi-card::before      { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+    .interest-card::before { background: linear-gradient(90deg, transparent, var(--magenta), transparent); }
+    .total-card::before    { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+    .result-icon {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      filter: drop-shadow(0 0 6px currentColor);
+    }
+
+    .result-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.45rem;
+    }
+
+    .result-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(0.75rem, 2.5vw, 1rem);
+      font-weight: 700;
+      line-height: 1.2;
+      word-break: break-all;
+    }
+
+    .emi-card      .result-value { color: var(--cyan);    text-shadow: 0 0 12px var(--cyan-glow); }
+    .interest-card .result-value { color: var(--magenta); text-shadow: 0 0 12px var(--magenta-glow); }
+    .total-card    .result-value { color: var(--gold);    text-shadow: 0 0 12px rgba(255,215,0,0.6); }
+
+    /* ───────────────────────────────────────────────
+       PROGRESS BAR (Interest vs Principal)
+    ─────────────────────────────────────────────── */
+    .breakdown-section {
+      margin-top: 1.5rem;
+      padding: 1.1rem;
+      background: rgba(0, 240, 255, 0.03);
+      border: 1px solid rgba(0, 240, 255, 0.08);
+      border-radius: 14px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease 0.15s, transform 0.5s ease 0.15s;
+    }
+
+    .breakdown-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .breakdown-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .breakdown-bar {
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+
+    .breakdown-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      width: 0;
+      transition: width 1s cubic-bezier(.22,1,.36,1);
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .breakdown-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .breakdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .breakdown-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-principal { background: var(--cyan);    box-shadow: 0 0 6px var(--cyan-glow); }
+    .dot-interest  { background: var(--magenta); box-shadow: 0 0 6px var(--magenta-glow); }
+
+    .breakdown-text {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .breakdown-pct {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .pct-principal { color: var(--cyan); }
+    .pct-interest  { color: var(--magenta); }
+
+    /* ───────────────────────────────────────────────
+       FOOTER
+    ─────────────────────────────────────────────── */
+    .site-footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      margin-top: 3rem;
+      padding: 0 1rem;
+    }
+
+    .footer-divider {
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,240,255,0.3), transparent);
+      margin: 0 auto 1.5rem;
+    }
+
+    .footer-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.3rem;
+    }
+
+    .footer-email {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      margin-bottom: 1.4rem;
+    }
+
+    .footer-email a {
+      color: var(--cyan);
+      text-decoration: none;
+      transition: text-shadow 0.2s;
+    }
+
+    .footer-email a:hover {
+      text-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    /* ── "Built for Digital Heroes" button ── */
+    .btn-heroes {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.8rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #020510;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--magenta) 0%, #b300ff 50%, var(--magenta) 100%);
+      background-size: 200% 200%;
+      border-radius: 99px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s ease;
+      box-shadow: 0 4px 20px rgba(255, 0, 200, 0.4), 0 0 0 1px rgba(255,0,200,0.3);
+      animation: heroesGradient 4s ease infinite, heroesBob 3s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes heroesGradient {
+      0%, 100% { background-position: 0% 50%; }
+      50%       { background-position: 100% 50%; }
+    }
+
+    @keyframes heroesBob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-4px); }
+    }
+
+    .btn-heroes::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 40%; height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.6s ease;
+    }
+
+    .btn-heroes:hover::before {
+      left: 130%;
+    }
+
+    .btn-heroes:hover {
+      transform: translateY(-6px) scale(1.05);
+      box-shadow: 0 14px 40px rgba(255, 0, 200, 0.55), 0 0 0 1px rgba(255,0,200,0.5), 0 0 80px rgba(255,0,200,0.15);
+      animation: heroesGradient 4s ease infinite;
+    }
+
+    .btn-heroes .hero-icon {
+      font-size: 1rem;
+      animation: rocketWobble 1.5s ease-in-out infinite;
+    }
+
+    @keyframes rocketWobble {
+      0%, 100% { transform: rotate(-15deg) translateY(0); }
+      50%       { transform: rotate(15deg) translateY(-2px); }
+    }
+
+    /* ───────────────────────────────────────────────
+       TOAST / ERROR
+    ─────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(255, 0, 80, 0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 60, 80, 0.4);
+      border-radius: 12px;
+      padding: 0.75rem 1.4rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #ff3c50;
+      letter-spacing: 0.05em;
+      z-index: 100;
+      transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.3s;
+      opacity: 0;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ───────────────────────────────────────────────
+       RESPONSIVE
+    ─────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .calculator-card { padding: 1.8rem 1.3rem; }
+      .results-panel   { grid-template-columns: 1fr 1fr; }
+      .total-card      { grid-column: 1 / -1; }
+    }
+
+    /* ───────────────────────────────────────────────
+       SCROLLBAR
+    ─────────────────────────────────────────────── */
+    ::-webkit-scrollbar        { width: 6px; }
+    ::-webkit-scrollbar-track  { background: #020510; }
+    ::-webkit-scrollbar-thumb  { background: var(--cyan); border-radius: 99px; }
+
+    /* ───────────────────────────────────────────────
+       NUMBER COUNTER ANIMATION
+    ─────────────────────────────────────────────── */
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .counting {
+      animation: countUp 0.3s ease forwards;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Floating particles -->
+  <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="badge">⚡ Quantum Finance Tool</div>
+    <h1>EMI Calculator</h1>
+    <p>Anti-Gravity Edition &nbsp;·&nbsp; Powered by Neural Math</p>
+  </header>
+
+  <!-- Anti-Gravity Wrapper -->
+  <div class="antigravity-wrapper" role="main">
+
+    <!-- Glassmorphism Card -->
+    <article class="calculator-card" id="calculator-card" aria-label="EMI Calculator">
+      <div class="card-glow" aria-hidden="true"></div>
+
+      <div class="card-content">
+
+        <!-- Card Header -->
+        <div class="card-header">
+          <div class="card-icon" aria-hidden="true">💳</div>
+          <div class="card-title-group">
+            <h2>EMI CALCULATOR</h2>
+            <span>Equated Monthly Instalment</span>
+          </div>
+        </div>
+
+        <div class="neon-divider" aria-hidden="true"></div>
+
+        <!-- FORM -->
+        <form id="emiForm" novalidate>
+
+          <!-- Loan Amount -->
+          <div class="input-group">
+            <div class="input-label">
+              <label for="loanAmount">Loan Amount</label>
+              <span class="input-tag">₹ INR</span>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-prefix" aria-hidden="true">₹</span>
+              <input
+                id="loanAmount"
+                class="field-input"
+                type="number"
+                min="1000"
+                max="100000000"
+                step="1000"
+                placeholder="e.g. 5,00,000"
+                aria-label="Loan Amount in Rupees"
+                autocomplete="off"
+              />
+            </div>
+            <div class="range-row">
+              <input
+                type="range"
+                class="range-slider"
+                id="loanSlider"
+                min="10000"
+                max="10000000"
+                step="10000"
+                value="500000"
+                aria-label="Loan Amount Slider"
+              />
+              <span class="range-max">₹1 Cr</span>
+            </div>
+          </div>
+
+          <!-- Interest Rate -->
+          <div class="input-group">
+            <div class="input-label">
+              <label for="interestRate">Annual Interest Rate</label>
+              <span class="input-tag">% p.a.</span>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-prefix" aria-hidden="true">%</span>
+              <input
+                id="interestRate"
+                class="field-input"
+                type="number"
+                min="0.1"
+                max="36"
+                step="0.1"
+                placeholder="e.g. 8.5"
+                aria-label="Annual Interest Rate in Percent"
+                autocomplete="off"
+              />
+            </div>
+            <div class="range-row">
+              <input
+                type="range"
+                class="range-slider"
+                id="rateSlider"
+                min="1"
+                max="36"
+                step="0.1"
+                value="8.5"
+                aria-label="Interest Rate Slider"
+              />
+              <span class="range-max">36%</span>
+            </div>
+          </div>
+
+          <!-- Tenure -->
+          <div class="input-group">
+            <div class="input-label">
+              <label for="loanTenure">Loan Tenure</label>
+              <span class="input-tag">MONTHS</span>
+            </div>
+            <div class="input-wrapper">
+              <input
+                id="loanTenure"
+                class="field-input no-prefix"
+                type="number"
+                min="1"
+                max="360"
+                step="1"
+                placeholder="e.g. 60"
+                aria-label="Loan Tenure in Months"
+                autocomplete="off"
+              />
+            </div>
+            <div class="range-row">
+              <input
+                type="range"
+                class="range-slider"
+                id="tenureSlider"
+                min="1"
+                max="360"
+                step="1"
+                value="60"
+                aria-label="Tenure Slider"
+              />
+              <span class="range-max">360 mo</span>
+            </div>
+          </div>
+
+          <!-- Calculate Button -->
+          <button
+            type="submit"
+            class="btn-calculate"
+            id="calculateBtn"
+            aria-label="Calculate EMI"
+          >
+            <span class="btn-icon" aria-hidden="true">⚡</span>
+            Calculate EMI
+          </button>
+
+        </form>
+
+        <!-- Results Panel -->
+        <section class="results-panel" id="resultsPanel" aria-live="polite" aria-label="Calculation Results">
+          <div class="result-card emi-card" id="emiCard">
+            <span class="result-icon" aria-hidden="true">🔮</span>
+            <div class="result-label">Monthly EMI</div>
+            <div class="result-value" id="emiValue">—</div>
+          </div>
+          <div class="result-card interest-card" id="interestCard">
+            <span class="result-icon" aria-hidden="true">📈</span>
+            <div class="result-label">Total Interest</div>
+            <div class="result-value" id="interestValue">—</div>
+          </div>
+          <div class="result-card total-card" id="totalCard">
+            <span class="result-icon" aria-hidden="true">💰</span>
+            <div class="result-label">Total Payment</div>
+            <div class="result-value" id="totalValue">—</div>
+          </div>
+        </section>
+
+        <!-- Breakdown Bar -->
+        <div class="breakdown-section" id="breakdownSection" aria-label="Principal vs Interest Breakdown">
+          <div class="breakdown-title">📊 Principal vs Interest Breakdown</div>
+          <div class="breakdown-bar">
+            <div class="breakdown-fill" id="breakdownFill"></div>
+          </div>
+          <div class="breakdown-labels">
+            <div class="breakdown-item">
+              <div class="breakdown-dot dot-principal"></div>
+              <span class="breakdown-text">Principal</span>
+              <span class="breakdown-pct pct-principal" id="principalPct"></span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-pct pct-interest" id="interestPct"></span>
+              <span class="breakdown-text">Interest</span>
+              <div class="breakdown-dot dot-interest"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.card-content -->
+    </article><!-- /.calculator-card -->
+
+    <!-- Dynamic shadow -->
+    <div class="antigravity-shadow" aria-hidden="true"></div>
+
+  </div><!-- /.antigravity-wrapper -->
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-divider" aria-hidden="true"></div>
+    <p class="footer-name">Created by Aakash Desani</p>
+    <p class="footer-email">
+      Email: <a href="mailto:desanitechnology@gmail.com">desanitechnology@gmail.com</a>
+    </p>
+    <a
+      href="https://digitalheroesco.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-heroes"
+      id="heroesBtn"
+      aria-label="Visit Digital Heroes Co"
+    >
+      <span class="hero-icon" aria-hidden="true">🚀</span>
+      Built for Digital Heroes
+    </a>
+  </footer>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+  <!-- ──────────────────────────────────────
+       VANILLA JAVASCRIPT
+  ────────────────────────────────────────── -->
+  <script>
+    /* ── Utility: Format currency ── */
+    const fmt = (n) =>
+      '₹' + Math.round(n).toLocaleString('en-IN');
+
+    /* ── EMI Formula ── */
+    function calcEMI(P, annualRate, N) {
+      if (annualRate === 0) return P / N;
+      const r = annualRate / 12 / 100;
+      return (P * r * Math.pow(1 + r, N)) / (Math.pow(1 + r, N) - 1);
+    }
+
+    /* ── DOM refs ── */
+    const loanInput    = document.getElementById('loanAmount');
+    const rateInput    = document.getElementById('interestRate');
+    const tenureInput  = document.getElementById('loanTenure');
+    const loanSlider   = document.getElementById('loanSlider');
+    const rateSlider   = document.getElementById('rateSlider');
+    const tenureSlider = document.getElementById('tenureSlider');
+    const emiForm      = document.getElementById('emiForm');
+    const resultsPanel = document.getElementById('resultsPanel');
+    const breakdownSec = document.getElementById('breakdownSection');
+    const emiValue     = document.getElementById('emiValue');
+    const interestValue= document.getElementById('interestValue');
+    const totalValue   = document.getElementById('totalValue');
+    const breakdownFill= document.getElementById('breakdownFill');
+    const principalPct = document.getElementById('principalPct');
+    const interestPct  = document.getElementById('interestPct');
+    const toast        = document.getElementById('toast');
+
+    /* ── Slider ↔ Input sync + progress fill ── */
+    function updateSliderFill(slider) {
+      const min = +slider.min, max = +slider.max, val = +slider.value;
+      const pct = ((val - min) / (max - min)) * 100;
+      slider.style.setProperty('--progress', pct + '%');
+    }
+
+    function linkSlider(input, slider) {
+      // Slider → input
+      slider.addEventListener('input', () => {
+        input.value = slider.value;
+        updateSliderFill(slider);
+      });
+      // Input → slider
+      input.addEventListener('input', () => {
+        const v = parseFloat(input.value);
+        if (!isNaN(v)) {
+          slider.value = Math.min(Math.max(v, +slider.min), +slider.max);
+          updateSliderFill(slider);
+        }
+      });
+      // Init fill
+      updateSliderFill(slider);
+    }
+
+    linkSlider(loanInput,   loanSlider);
+    linkSlider(rateInput,   rateSlider);
+    linkSlider(tenureInput, tenureSlider);
+
+    // Pre-fill defaults
+    loanInput.value   = 500000;
+    rateInput.value   = 8.5;
+    tenureInput.value = 60;
+
+    /* ── Toast helper ── */
+    let toastTimer;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    /* ── Animated number counter ── */
+    function animateValue(el, start, end, duration) {
+      const startTs = performance.now();
+      function step(ts) {
+        const progress = Math.min((ts - startTs) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 4);
+        const current = start + (end - start) * ease;
+        el.textContent = fmt(current);
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = fmt(end);
+      }
+      requestAnimationFrame(step);
+    }
+
+    /* ── Calculate & display ── */
+    function calculate() {
+      const P = parseFloat(loanInput.value);
+      const R = parseFloat(rateInput.value);
+      const N = parseFloat(tenureInput.value);
+
+      if (!P || P <= 0)       { showToast('⚠️ Please enter a valid Loan Amount.'); return; }
+      if (R < 0)              { showToast('⚠️ Interest rate cannot be negative.'); return; }
+      if (!N || N < 1)        { showToast('⚠️ Tenure must be at least 1 month.'); return; }
+
+      const emi          = calcEMI(P, R, N);
+      const totalPayment = emi * N;
+      const totalInterest= totalPayment - P;
+      const principalShare = (P / totalPayment) * 100;
+      const interestShare  = 100 - principalShare;
+
+      // Show panels
+      resultsPanel.classList.add('visible');
+      breakdownSec.classList.add('visible');
+
+      // Animate values
+      animateValue(emiValue,      0, emi,          900);
+      animateValue(interestValue, 0, totalInterest, 900);
+      animateValue(totalValue,    0, totalPayment,  900);
+
+      // Breakdown bar
+      setTimeout(() => {
+        breakdownFill.style.width = principalShare.toFixed(1) + '%';
+      }, 200);
+
+      principalPct.textContent = principalShare.toFixed(1) + '%';
+      interestPct.textContent  = interestShare.toFixed(1) + '%';
+    }
+
+    emiForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      calculate();
+    });
+
+    // Auto-calculate on slider change after first load
+    let autoCalc = false;
+    [loanSlider, rateSlider, tenureSlider].forEach(s => {
+      s.addEventListener('change', () => { if (autoCalc) calculate(); });
+    });
+    setTimeout(() => { autoCalc = true; }, 500);
+
+    /* ── Particle System ── */
+    (function initParticles() {
+      const container = document.getElementById('particles');
+      const colors    = ['#00f0ff', '#ff00c8', '#a78bfa', '#ffd700'];
+      const count     = 28;
+
+      for (let i = 0; i < count; i++) {
+        const p  = document.createElement('div');
+        const sz = Math.random() * 4 + 1.5;
+        const c  = colors[Math.floor(Math.random() * colors.length)];
+
+        p.className = 'particle';
+        Object.assign(p.style, {
+          width:           sz + 'px',
+          height:          sz + 'px',
+          left:            Math.random() * 100 + 'vw',
+          bottom:          '-10px',
+          background:      c,
+          boxShadow:       `0 0 ${sz * 2}px ${c}`,
+          animationDuration:   (Math.random() * 14 + 10) + 's',
+          animationDelay:      (Math.random() * 10) + 's',
+        });
+
+        container.appendChild(p);
+      }
+    })();
+
+    /* ── Keyboard shortcut: Enter triggers calculate ── */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && document.activeElement !== document.querySelector('.btn-calculate')) {
+        calculate();
+      }
+    });
+
+    /* ── Subtle card tilt on mouse move (desktop only) ── */
+    const card = document.getElementById('calculator-card');
+    card.addEventListener('mousemove', (e) => {
+      const rect   = card.getBoundingClientRect();
+      const cx     = rect.left + rect.width  / 2;
+      const cy     = rect.top  + rect.height / 2;
+      const dx     = (e.clientX - cx) / (rect.width  / 2);
+      const dy     = (e.clientY - cy) / (rect.height / 2);
+      card.style.transform = `perspective(900px) rotateY(${dx * 4}deg) rotateX(${-dy * 4}deg)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  </script>
+
+</body>
+</html>
