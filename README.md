@@ -2,7 +2,7 @@ Live Tool URL:
 https://emi-calculator-pro-navy.vercel.app/
 
 GitHub Repo:
-https://github.com/Akashdesani/smart-emi-calculator-pro
+https://github.com/Akashdesani/emi-calculator-pro
 
 Full Name:
 Akashbhai Maheshbhai Desani
